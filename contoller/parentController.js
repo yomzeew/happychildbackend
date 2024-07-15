@@ -18,6 +18,7 @@ const VerifyTemplate=require('../services/emailtemplate')
 
 }
 const parentLoginController=async(req,res)=>{
+  userModel.createTable()
     const SECRET_KEY = process.env.SECRET_KEY; 
     const {email,password}=req.body
     const getrows=await userModel.getUserByEmail(email)
