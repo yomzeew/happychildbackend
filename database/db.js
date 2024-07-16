@@ -7,7 +7,7 @@
 //   database: 'happychild' 
 // });
 
-module.exports = pool.promise();
+// module.exports = pool.promise();
 
 const mysql = require('mysql2');
 const pool = mysql.createPool({
