@@ -4,7 +4,7 @@ const jwt=require('jsonwebtoken')
 const transporter=require('../services/emailconfig')
 const VerifyTemplate=require('../services/emailtemplate')
  const parentRegController=async(req,res)=>{
-    userModel.createTable()
+    await userModel.createTable()
     const {email,password,verificationstatus}=req.body
     console.log(verificationstatus)
     const hashedPassword = await bcrypt.hash(password, 8);
@@ -18,7 +18,7 @@ const VerifyTemplate=require('../services/emailtemplate')
 
 }
 const parentLoginController=async(req,res)=>{
-  userModel.createTable()
+  await userModel.createTable()
     const SECRET_KEY = process.env.SECRET_KEY; 
     const {email,password}=req.body
     const getrows=await userModel.getUserByEmail(email)
@@ -65,7 +65,7 @@ const parentSendEmail=async(req,res)=>{
     subject: 'Email Verification',
     html: VerifyTemplate(otp),
   }; 
-transporter.sendMail(mailOptions, (error, info) => {
+transporter.sendMail(mailOptions, async(error, info) => {
     if (error) {
       console.error(error);
      
@@ -74,26 +74,32 @@ transporter.sendMail(mailOptions, (error, info) => {
       console.log('Email sent: ' + info.response);
       req.session.otp=otp
       req.session.expiretime=expiresAt
-      res.status(200).json({message:'Email sent'});
+      const updateuser=await userModel.updateUser(userId,otp,expiresAt)
+      if (updateuser === 0) {
+        res.status(404).json({ error: 'Otp error' });
+      } else {
+        res.status(200).json({message:'Email sent'});
+      }
+      
     }
   });
  }
  const validateOtp = async(req, res) => {
   const id=req.userId
   const { otp } = req.body;
-  const sessionOtp = req.session.otp;
-  console.log(sessionOtp)
-  const sessionOtpExpiresAt = req.session.expiretime;
+  const getrows=await getUserById(id)
+  const userotp=getrows.otp
+  const userexpireAt=getrows.expiresAt
 
-  if (!sessionOtp || !sessionOtpExpiresAt) {
+  if (!userotp || !userexpireAt) {
     return res.status(400).json({ message: 'No OTP found' });
   }
 
-  if (Date.now() > sessionOtpExpiresAt) {
+  if (Date.now() > userexpireAt) {
     return res.status(400).json({ message: 'OTP has expired' });
   }
 
-  if (otp == sessionOtp) {
+  if (otp == userotp) {
     //update status
     const verifcationstatus=1
     const updateuser=await userModel.updateUserStatus(id,verifcationstatus)

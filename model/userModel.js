@@ -10,7 +10,9 @@ const createTable = async () => {
       occupation VARCHAR(100)  NULL,
       phonenumber VARCHAR(25)  NULL,   
       address VARCHAR(500)  NULL  ,
-      verificationstatus BOOLEAN NULL
+      verificationstatus BOOLEAN NULL,
+      otp VARCHAR(6) NULL,
+      expireAt TIMESTAMP NULL
     )
   `;
     await db.execute(query);
@@ -39,6 +41,11 @@ const updateUserStatus = async (id,verifcationstatus) => {
     const [result] = await db.execute(query, [verifcationstatus, id]);
     return result.affectedRows;
 };
+const updateUserOtp = async (id,otp,expireAt) => {
+    const query = 'UPDATE users SET otp=?,expireAt=? WHERE id = ?';
+    const [result] = await db.execute(query, [otp,expireAt,id]);
+    return result.affectedRows;
+};
 
 const getUserById = async (id) => {
     const query = 'SELECT * FROM users WHERE id = ?';
@@ -64,5 +71,6 @@ module.exports = {
     getUserById,
     getAllUsers,
     getUserByEmail,
-    updateUserStatus
+    updateUserStatus,
+    updateUserOtp
 };
