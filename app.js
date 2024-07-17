@@ -12,7 +12,7 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 const corsOptions = {
-  origin: ["http://172.20.10.19:3000","http://172.20.10.3:3001","http://happychild-topaz.vercel.app/", "http://localhost:3000","http://localhost:3001"],
+  origin: ["http://172.20.10.3:3000","http://172.20.10.3:3001","http://happychild-topaz.vercel.app/", "http://localhost:3000","http://localhost:3001"],
 };
 app.use(session({
   secret: 'happychild12334mother',

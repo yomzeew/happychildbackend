@@ -5,8 +5,14 @@ const transporter=require('../services/emailconfig')
 const VerifyTemplate=require('../services/emailtemplate')
  const parentRegController=async(req,res)=>{
     await userModel.createTable()
-    const {email,password,verificationstatus}=req.body
-    console.log(verificationstatus)
+    const {email,password}=req.body
+    const verificationstatus=false
+    const checkEmail=await userModel.getUserByEmail(email)
+    if(checkEmail){
+      res.status(401).json({ auth: false, token: null, message: 'Email already exist.' });
+      return
+    }
+   
     const hashedPassword = await bcrypt.hash(password, 8);
     try{
         const userId = await userModel.insertUser(email, hashedPassword,verificationstatus);
