@@ -9,7 +9,7 @@ const jwtverify = (req, res, next) => {
   }
 
   // Ensure the token is in the format: Bearer <token>
-  const token = authHeader.split(' ')[1];
+  const token =authHeader.split(' ')[1];
 
   if (!token) {
     return res.status(403).json({ auth: false, message: 'No token provided.' });

@@ -10,6 +10,7 @@ router.get('/', function(req, res, next) {
 router.post('/register',controller.parentRegController)
 router.post('/login',controller.parentLoginController)
 router.post('/update',verifytoken,controller.parentUpdateController)
+router.post('/emailstatus',verifytoken,controller.parentEmailStatus)
 router.post('/sendotp',verifytoken,controller.parentSendEmail)
 router.post('/verifyotp',verifytoken,controller.validateOtp)
 

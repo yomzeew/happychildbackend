@@ -54,11 +54,26 @@ const parentUpdateController=async(req,res)=>{
  
 
 }
+const parentEmailStatus=async(req,res)=>{
+  const userId=req.userId
+  const getrow=await userModel.getUserById(userId)
+  const validstatus=getrow.verificationstatus
+  if(validstatus==0){
+    res.status(201).json({ message:false });
+
+  }
+  else{
+    res.status(201).json({ message:true });
+
+  }
+
+  
+}
 const parentSendEmail=async(req,res)=>{
   const userId=req.userId
   const getrow=await userModel.getUserById(userId)
   const email=getrow.email
-  console.log(getrow)
+  console.log(email)
   function generateRandom6DigitNumber() {
     return Math.floor(Math.random() * 9000) + 1000;
   }
@@ -78,9 +93,7 @@ transporter.sendMail(mailOptions, async(error, info) => {
       res.status(500).json({message:'Error sending email'});
     } else {
       console.log('Email sent: ' + info.response);
-      req.session.otp=otp
-      req.session.expiretime=expiresAt
-      const updateuser=await userModel.updateUser(userId,otp,expiresAt)
+      const updateuser=await userModel.updateUserOtp(userId,otp,expiresAt)
       if (updateuser === 0) {
         res.status(404).json({ error: 'Otp error' });
       } else {
@@ -93,15 +106,15 @@ transporter.sendMail(mailOptions, async(error, info) => {
  const validateOtp = async(req, res) => {
   const id=req.userId
   const { otp } = req.body;
-  const getrows=await getUserById(id)
+  const getrows=await userModel.getUserById(id)
   const userotp=getrows.otp
-  const userexpireAt=getrows.expiresAt
-
+  const userexpireAt=new Date(getrows.expireAt).getTime();
+ 
   if (!userotp || !userexpireAt) {
     return res.status(400).json({ message: 'No OTP found' });
   }
 
-  if (Date.now() > userexpireAt) {
+  if (Date.parse(new Date().getTime()) >Date.parse(getrows.expireAt)) {
     return res.status(400).json({ message: 'OTP has expired' });
   }
 
@@ -126,5 +139,6 @@ module.exports={
     parentRegController,
     parentUpdateController,
     parentSendEmail,
-    validateOtp
+    validateOtp,
+    parentEmailStatus
 }
