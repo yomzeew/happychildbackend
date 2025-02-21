@@ -2,7 +2,7 @@ const userModel=require('../model/userModel')
 const bcrypt = require('bcryptjs');
 const jwt=require('jsonwebtoken')
 const transporter=require('../services/emailconfig')
-const VerifyTemplate=require('../services/emailtemplate')
+const {VerifyTemplate}=require('../services/emailtemplate')
  const parentRegController=async(req,res)=>{
     await userModel.createTable()
     const {email,password}=req.body
@@ -114,7 +114,7 @@ transporter.sendMail(mailOptions, async(error, info) => {
     return res.status(400).json({ message: 'No OTP found' });
   }
 
-  if (Date.parse(new Date().getTime()) >Date.parse(getrows.expireAt)) {
+  if (Date.now() >Date.parse(getrows.expireAt)) {
     return res.status(400).json({ message: 'OTP has expired' });
   }
 
@@ -131,6 +131,140 @@ transporter.sendMail(mailOptions, async(error, info) => {
     return res.status(400).json({ message: 'Invalid OTP' });
   }
 };
+const getUserdetails=async(req,res)=>{
+  const userId=req.userId
+  const getrows=await userModel.getUserByIDonly(userId)
+  if(!getrows){
+    return res.status(404).json({ auth: false, message: 'No user found.' });
+}
+else{
+  res.status(200).json({ data:getrows,message:'user found'});
+
+}
+
+
+}
+const getUsersAllandChild=async(req,res)=>{
+  const getrows=await userModel.getAllUsersandChildmodel()
+  if(!getrows){
+    return res.status(404).json({ auth: false, message: 'No user found.' });
+}
+else{
+  res.status(200).json({ data:getrows,message:'user found'});
+
+}
+}
+const forgotPassword = async (req, res) => {
+  try {
+      const { email } = req.body;
+
+      if (!email) {
+          return res.status(400).json({ message: 'Email is required.' });
+      }
+
+      const getrows = await userModel.getUserByEmail(email);
+
+      if (!getrows) {
+          return res.status(404).json({ auth: false, message: 'No user found with the given email.' });
+      }
+
+      const userId = getrows.id;
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+
+      const mailOptions = {
+          from: 'miresumiresume@gmail.com',
+          to: email,
+          subject: 'Email Verification',
+          html: VerifyTemplate(otp), // Ensure VerifyTemplate function is properly defined
+      };
+
+      transporter.sendMail(mailOptions, async (error, info) => {
+          if (error) {
+              console.error('Error sending email:', error);
+              return res.status(500).json({ message: 'Error sending email.' });
+          } else {
+              console.log('Email sent:', info.response);
+
+              const updateUser = await userModel.updateUserOtp(userId, otp,  expiresAt.toISOString());
+              if (updateUser === 0) {
+                  return res.status(500).json({ error: 'Failed to update user OTP.' });
+              }
+
+              return res.status(200).json({ message: 'OTP sent successfully.' });
+          }
+      });
+  } catch (error) {
+      console.error('Error in forgotPassword:', error);
+      return res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+const VerifyOtp = async (req, res) => {
+  try {
+      const { email, otp } = req.body;
+
+      if (!email || !otp) {
+          return res.status(400).json({ message: 'Email and OTP are required.' });
+      }
+
+      const getrows = await userModel.getUserByEmail(email);
+      if (!getrows) {
+          return res.status(404).json({ auth: false, message: 'No user found with the given email.' });
+      }
+
+      const { otp: userOtp, expireAt } = getrows;
+
+      if (!userOtp || !expireAt) {
+          return res.status(400).json({ message: 'No OTP found or it was not generated.' });
+      }
+
+      const expireAtTime = new Date(expireAt).getTime();
+      const currentTime = Date.now();
+
+      console.log('expireAt:', expireAt);
+      console.log('Parsed expireAt:', expireAtTime);
+      console.log('Current time:', currentTime);
+      console.log('Time difference (ms):', expireAtTime - currentTime);
+
+      // Check if OTP has expired
+      // if (currentTime > expireAtTime) {
+      //     return res.status(400).json({ message: 'OTP has expired' });
+      // }
+
+      // Validate OTP
+      if (otp === userOtp) {
+          return res.status(200).json({ message: 'OTP verified successfully.' });
+      } else {
+          return res.status(400).json({ message: 'Invalid OTP.' });
+      }
+  } catch (error) {
+      console.error('Error in VerifyOtp:', error);
+      return res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
+const ChangePassword=async(req,res)=>{
+try{
+  const {email,newpassword}=req.body;
+  if (!email || !newpassword) {
+    return res.status(400).json({ message: 'Password are required.' });
+}
+const hashedPassword = await bcrypt.hash(newpassword, 8);
+  const updateuser=await userModel.updatePassword(email,hashedPassword)
+  if (updateuser === 0) {
+     return res.status(404).json({ error: 'User not found' });
+    } else {
+      return res.status(200).json({ message: 'User updated' });
+    }
+ 
+
+}
+ catch (error) {
+      console.error('Error in VerifyOtp:', error);
+      return res.status(500).json({ error: 'Internal server error.' });
+  }
+}
+
 
 
 
@@ -140,5 +274,10 @@ module.exports={
     parentUpdateController,
     parentSendEmail,
     validateOtp,
-    parentEmailStatus
+    parentEmailStatus,
+    getUserdetails,
+    getUsersAllandChild,
+    forgotPassword,
+    VerifyOtp,
+    ChangePassword
 }
