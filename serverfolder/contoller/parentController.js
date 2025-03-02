@@ -81,7 +81,7 @@ const parentSendEmail=async(req,res)=>{
   const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes from now
   //update opt
   const mailOptions = {
-    from: 'noreply@appychild.uk',
+    from: 'miresumiresume@gmail.com',
     to: email,
     subject: 'Email Verification',
     html: VerifyTemplate(otp),
@@ -173,7 +173,7 @@ const forgotPassword = async (req, res) => {
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
 
       const mailOptions = {
-          from: 'noreply@appychild.uk',
+          from: 'miresumiresume@gmail.com',
           to: email,
           subject: 'Email Verification',
           html: VerifyTemplate(otp), // Ensure VerifyTemplate function is properly defined

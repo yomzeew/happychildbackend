@@ -133,7 +133,7 @@ const insertcontactcontroller=async(req,res)=>{
     try{
         const result=await appsettingmodel.insertdatacenter(fullname,email,subject,message)
         const mailOptions = {
-            from: 'noreply@appychild.uk',
+            from: 'miresumiresume@gmail.com',
             to: email,
             subject: 'Contact  Center',
             html: ContactEmail(fullname,email,subject,message),
@@ -148,7 +148,7 @@ const insertcontactcontroller=async(req,res)=>{
                     res.status(201).json({message:'data updated'})
                 }
               console.log('Email sent: ' + info.response);
-             
+              res.status(200).json({message:'Email sent'});
               
             }
           });

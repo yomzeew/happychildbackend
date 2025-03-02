@@ -7,7 +7,6 @@ const appsettings=require('../contoller/appsettingcontroller')
 const verifytoken=require('../middleware/jwtVerification');
 const {getAllbookingController, bookTimeSlotsController,getbookingbyidcontroller,getbookingByparentidcontroller,getbookingallcontroller, sendEmailpayment, updatepaymentcontrol}= require('../contoller/bookingController');
 const { updatePayment } = require('../model/bookModel');
-const upload = require('../middleware/uploadFileimage');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -52,9 +51,6 @@ router.post('/insertbankdetails',verifytoken,appsettings.bankdetails);
 router.post('/getbankdetails',verifytoken,appsettings.getbankdetailcontroller)
 router.post('/contactcenter',appsettings.insertcontactcontroller)
 router.post('/updatepayment',verifytoken,updatepaymentcontrol)
-router.post('/addTestimony',verifytoken,upload.single('filetoupload'),adminController.UploadTestimony)
-router.post('/getTestimony',verifytoken,adminController.getTestimony)
-router.post('/deleteTestimony',verifytoken,adminController.deleteTestimony)
 
 
 

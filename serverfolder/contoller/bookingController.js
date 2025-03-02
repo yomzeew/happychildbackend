@@ -101,7 +101,7 @@ const sendEmailpayment=async(req,res)=>{
     const accountno=rowbankdetails[0].accountno
     const sortcode=rowbankdetails[0].sortcode
     const mailOptions = {
-        from: 'noreply@appychild.uk',
+        from: 'miresumiresume@gmail.com',
         to: email,
         subject: 'Payment Details',
         html: SendPayment(invoiceid,startdate,enddate,days,totalamount,childfullname,bankname,accountno,sortcode,firstname),

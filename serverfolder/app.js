@@ -40,7 +40,6 @@ app.use(cookieParser());
 
 
 // API Routes
-app.use('/uploads', express.static('uploads')); // Serve uploaded images
 app.use('/backend/api/v1', indexRouter);
 app.use('/backend/users', usersRouter);
 
